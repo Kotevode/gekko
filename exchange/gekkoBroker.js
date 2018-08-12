@@ -14,11 +14,23 @@ const errors = require('./exchangeErrors');
 const Portfolio = require('./portfolioManager');
 // const Market = require('./market');
 const orders = require('./orders');
-const bindAll = require('./exchangeUtils').bindAll;
+const exchangeUtils = require('./exchangeUtils');
+const bindAll = exchangeUtils.bindAll;
+const isValidOrder = exchangeUtils.isValidOrder;
 
 class Broker {
   constructor(config) {
     this.config = config;
+
+    if(config.private) {
+      if(this.cantTrade()) {
+        throw new Error(this.cantTrade());
+      }
+    } else {
+      if(this.cantMonitor()) {
+        throw new Error(this.cantMonitor());
+      }
+    }
 
     this.orders = {
       // contains current open orders
@@ -55,14 +67,19 @@ class Broker {
     return checker.cantTrade(this.config);
   }
 
+  cantMonitor() {
+    return checker.cantMonitor(this.config);
+  }
+
   sync(callback) {
     if(!this.private) {
       this.setTicker();
       return;
     }
 
-    if(this.cantTrade())
+    if(this.cantTrade()) {
       throw new errors.ExchangeError(this.cantTrade());
+    }
 
     this.syncPrivateData();
   }
@@ -98,6 +115,15 @@ class Broker {
     });
   }
 
+  isValidOrder(amount, price) {
+    return isValidOrder({
+      market: this.marketConfig,
+      api: this.api,
+      amount,
+      price
+    });
+  }
+
   createOrder(type, side, amount, parameters, handler) {
     if(!this.config.private)
       throw new Error('Client not authenticated');
@@ -109,8 +135,6 @@ class Broker {
       throw new Error('Unknown order type');
 
     const order = new orders[type](this.api);
-
-    this.orders.open.push(order);
 
     // todo: figure out a smarter generic way
     this.syncPrivateData(() => {

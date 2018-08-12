@@ -54,7 +54,7 @@ var Base = function(settings) {
   // make sure we have all methods
   _.each(['init', 'check'], function(fn) {
     if(!this[fn])
-      util.die('No ' + fn + ' function in this trading method found.')
+      util.die('No ' + fn + ' function in this strategy found.')
   }, this);
 
   if(!this.update)
@@ -226,6 +226,13 @@ Base.prototype.advice = function(newPosition) {
     id: 'advice-' + (++this.propogatedAdvices),
     recommendation: newPosition
   });
+}
+
+Base.prototype.notify = function(content) {
+  this.emit('stratNotification', {
+    content,
+    date: new Date(),
+  })
 }
 
 Base.prototype.finish = function(done) {

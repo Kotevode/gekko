@@ -1,6 +1,6 @@
 var settings = {
   wait: 0,
-  each: 10
+  each: 6
 };
 
 // -------
@@ -14,13 +14,16 @@ var method = {
   init: _.noop,
   update: _.noop,
   log: _.noop,
+  processTrade: function(trade) {
+    log.debug('TRADE RECEIVED BY processTrade:', trade);
+  },
   check: function(candle) {
 
     if(settings.wait > i)
       return;
 
     log.info('iteration:', i);
-    
+
     if(i % settings.each === 0) {
       log.debug('trigger SHORT');
       this.advice('short');
