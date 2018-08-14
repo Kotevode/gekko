@@ -14,6 +14,7 @@ const allowedTulipIndicators = _.keys(tulind);
 const AsyncIndicatorRunner = function() {
   this.talibIndicators = {};
   this.tulipIndicators = {};
+  this.asyncIndicators = {};
 
   this.candleProps = {
     open: [],
@@ -36,7 +37,7 @@ AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   }
 
   this.age++;
-  this.inflight = true;  
+  this.inflight = true;
 
   this.candleProps.open.push(candle.open);
   this.candleProps.high.push(candle.high);
@@ -52,12 +53,14 @@ AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
     this.candleProps.volume.shift();
   }
 
-  this.calculateIndicators(next);
+  this.calculateIndicators(next, candle);
 }
 
-AsyncIndicatorRunner.prototype.calculateIndicators = function(next) {
+AsyncIndicatorRunner.prototype.calculateIndicators = function(next, candle) {
   const done = _.after(
-    _.size(this.talibIndicators) + _.size(this.tulipIndicators),
+    _.size(this.talibIndicators) +
+    _.size(this.tulipIndicators) +
+    _.size(this.asyncIndicators),
     this.handlePostFlight(next)
   );
 
@@ -96,6 +99,22 @@ AsyncIndicatorRunner.prototype.calculateIndicators = function(next) {
       tulindResultHander(name)
     )
   );
+
+  var asyncHandler = name => (err, result) => {
+    if (err)
+      util.die('ASYNC ERROR:', error);
+
+    this.asyncIndicators[name].result = result
+    done();
+  }
+
+  _.each(
+    this.asyncIndicators,
+    (indicator, name) => indicator.update(
+      candle,
+      asyncHandler(name)
+    )
+  )
 }
 
 AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
@@ -108,6 +127,11 @@ AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
       this.processCandle(candle, next);
     }
   }
+}
+
+// TODO: Добавление асинхронного индикатора
+AsyncIndicatorRunner.prototype.addAsyncIndicator = function(name, indicator) {
+  this.asyncIndicators[name] = indicator
 }
 
 AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, parameters) {

@@ -74,7 +74,9 @@ var Base = function(settings) {
 
   this.setup = true;
 
-  if(_.size(this.asyncIndicatorRunner.talibIndicators) || _.size(this.asyncIndicatorRunner.tulipIndicators))
+  if(_.size(this.asyncIndicatorRunner.talibIndicators) ||
+    _.size(this.asyncIndicatorRunner.tulipIndicators) ||
+    _.size(this.asyncIndicatorRunner.asyncIndicators))
     this.asyncTick = true;
   else
     delete this.asyncIndicatorRunner;
@@ -92,10 +94,15 @@ Base.prototype.tick = function(candle, done) {
 
   if(this.asyncTick) {
     this.asyncIndicatorRunner.processCandle(candle, () => {
+      // TODO: Результат кастомных операторов
 
       if(!this.talibIndicators) {
         this.talibIndicators = this.asyncIndicatorRunner.talibIndicators;
         this.tulipIndicators = this.asyncIndicatorRunner.tulipIndicators;
+      }
+
+      if(!this.asyncIndicators) {
+        this.asyncIndicators = this.asyncIndicatorRunner.asyncIndicators;
       }
 
       afterAsync();
@@ -197,6 +204,11 @@ Base.prototype.addTalibIndicator = function(name, type, parameters) {
 
 Base.prototype.addTulipIndicator = function(name, type, parameters) {
   this.asyncIndicatorRunner.addTulipIndicator(name, type, parameters);
+}
+
+// TODO: Добавление асинхронного индикатора, по аналогии с talib
+Base.prototype.addAsyncIndicator = function(name, newIndicator) {
+  this.asyncIndicatorRunner.addAsyncIndicator(name, newIndicator);
 }
 
 Base.prototype.addIndicator = function(name, type, parameters) {

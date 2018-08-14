@@ -35,7 +35,7 @@ config.tradingAdvisor = {
   enabled: true,
   method: 'signal-matrix',
   candleSize: 1,
-  historySize: 60,
+  historySize: 210,
 }
 
 // Exponential Moving Averages settings:
@@ -434,10 +434,10 @@ config.mongodb = {
 
 config.backtest = {
   daterange: {
-    from: "2018-05-01 00:00:00",
-    to: "2018-07-01 00:00:00"
+    from: "2018-07-01 00:00:00",
+    to: "2018-07-09 00:00:00"
   },
-  batchSize: 50
+  batchSize: 1
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

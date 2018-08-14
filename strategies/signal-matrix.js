@@ -1,4 +1,5 @@
 const CandleBatcher = require('../core/candleBatcher');
+const SignalMatrix = require('./indicators/signal-matrix');
 
 var log = require('../core/log');
 
@@ -6,43 +7,35 @@ var strat = {};
 
 // Prepare everything our strat needs
 strat.init = function() {
-	const timeframes = [
-		1, 5, 10, 15, 30, 45, 60, 180, 300, 720, 1440
-	]
-
-	this.batchers = timeframes.map(function(frame) {
-		var batcher = new CandleBatcher(frame);
-		batcher.on('candle', this.updateTF);
-		return batcher;
-	}, this);
-}
-
-strat.updateTF = function(candle, candleSize) {
-	log.info(candle.close + " " + candleSize + " mins")
+	let matrix = new SignalMatrix({
+		"1m": 1,
+		"5m": 5,
+		"15m": 15,
+	})
+	matrix.addTalibIndicator('ma', 'ma', {
+		optInTimePeriod: 14,
+		optInMAType: 0
+	});
+	matrix.addTalibIndicator('rsi', 'rsi', {
+		optInTimePeriod: 14
+	});
+	this.addAsyncIndicator('matrix', matrix);
 }
 
 // What happens on every new candle?
 strat.update = function(candle) {
-	this.batchers.forEach(b => {
-		b.write([candle]);
-		b.flush();
-	});
-}
-
-strat.updateAll = function(candle) {
-	log.info("update all");
 }
 
 // For debugging purposes.
 strat.log = function() {
-	log.info("Batcher");
 }
 
 // Based on the newly calculated
 // information, check if we should
 // update or not.
 strat.check = function(candle) {
-  // your code!
+	log.info(candle.start);
+	log.info(this.asyncIndicators.matrix.result);
 }
 
 // Optional for executing code
