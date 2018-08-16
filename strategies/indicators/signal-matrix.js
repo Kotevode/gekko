@@ -6,12 +6,11 @@ const AsyncIndicatorRunner = require('../../plugins/tradingAdvisor/asyncIndicato
 /**
 
 config = {
-	timeframes: {
-		5m: 5
-		1h: 60
-		5h: 300
-		1d: 1440
-	}
+	_5m: 5,
+	_1h: 60,
+	_5h: 300,
+	_1d: 1440,
+    ...
 }
 
 */
@@ -76,12 +75,11 @@ SignalMatrix.prototype.update = function(candle, cb) {
 		}
 	}, this);
 	if (!_.size(promises)) {
-		cb(null, {});
+		cb(null, this.result);
 		return
 	}
 	return promisedProperties(promises)
 		.then((result) => {
-			debugger;
 			cb(null, Object.assign(
 				this.result,
 				result

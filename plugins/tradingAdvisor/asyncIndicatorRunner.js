@@ -24,7 +24,7 @@ const AsyncIndicatorRunner = function() {
     volume: []
   };
 
-  this.candlePropsCacheSize = 1000;
+  this.candlePropsCacheSize = 43200;
 
   this.inflight = false;
   this.backlog = [];
@@ -103,7 +103,6 @@ AsyncIndicatorRunner.prototype.calculateIndicators = function(next, candle) {
   var asyncHandler = name => (err, result) => {
     if (err)
       util.die('ASYNC ERROR:', error);
-
     this.asyncIndicators[name].result = result
     done();
   }

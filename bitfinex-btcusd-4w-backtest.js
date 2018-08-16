@@ -8,7 +8,7 @@ var config = {};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 config.silent = false;
-config.debug = false; // for additional logging / debugging
+config.debug = true; // for additional logging / debugging
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                         WATCHING A MARKET
@@ -35,7 +35,7 @@ config.tradingAdvisor = {
   enabled: true,
   method: 'signal-matrix',
   candleSize: 1,
-  historySize: 210,
+  historySize: 43200,
 }
 
 // Exponential Moving Averages settings:
@@ -434,10 +434,10 @@ config.mongodb = {
 
 config.backtest = {
   daterange: {
-    from: "2018-07-01 00:00:00",
-    to: "2018-07-09 00:00:00"
+    from: "2017-07-01 00:00:00",
+    to: "2018-07-01 00:00:00",
   },
-  batchSize: 1
+  batchSize: 1440
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
