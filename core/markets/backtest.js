@@ -37,6 +37,7 @@ var Market = function() {
 
   this.reader = new Reader();
   this.batchSize = config.backtest.batchSize;
+  this.fetchedCandles = [];
   this.iterator = {
     from: from.clone(),
     to: from.clone().add(this.batchSize, 'm').subtract(1, 's')
@@ -48,9 +49,14 @@ Market.prototype = Object.create(Readable.prototype, {
   constructor: { value: Market }
 });
 
-Market.prototype._read = _.once(function() {
-  this.get();
-});
+Market.prototype._read = function() {
+  if (_.size(this.fetchedCandles) == 0) {
+    log.debug("\t\t\t\t\t\t\t\t\t\tFetching new candles");
+    this.get();
+  } else {
+    this.pushCandle();
+  }
+}
 
 Market.prototype.get = function() {
   if(this.iterator.to >= to) {
@@ -67,7 +73,6 @@ Market.prototype.get = function() {
 }
 
 Market.prototype.processCandles = function(err, candles) {
-  this.pushing = true;
   var amount = _.size(candles);
 
   if(amount === 0) {
@@ -89,20 +94,24 @@ Market.prototype.processCandles = function(err, candles) {
     log.warn(`Simulation based on incomplete market data (${this.batchSize - amount} missing between ${from} and ${to}).`);
   }
 
-  _.each(candles, function(c, i) {
+  for (var c of candles) {
     c.start = moment.unix(c.start);
-    this.push(c);
-  }, this);
-
-  this.pushing = false;
+  }
+  this.fetchedCandles = candles.reverse();
 
   this.iterator = {
     from: this.iterator.from.clone().add(this.batchSize, 'm'),
     to: this.iterator.from.clone().add(this.batchSize * 2, 'm').subtract(1, 's')
   }
 
-  if(!this.closed)
-    this.get();
+  this.pushCandle();
+}
+
+Market.prototype.pushCandle = function() {
+  // When nothing to push
+  if (_.size(this.fetchedCandles) == 0)
+    return;
+  this.push(this.fetchedCandles.pop());
 }
 
 module.exports = Market;
